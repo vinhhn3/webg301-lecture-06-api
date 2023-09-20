@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products</title>
+    <!-- Include jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Products</h1>
+
+    <!-- Create a form to add new products -->
+    <form id="add-product-form">
+        <input type="text" id="name" placeholder="Product Name">
+        <input type="text" id="price" placeholder="Product Price">
+        <button type="button" onclick="addProduct()">Add Product</button>
+    </form>
+
+    <!-- Display a list of products -->
+    <ul id="product-list">
+        <!-- Product items will be displayed here -->
+    </ul>
+
+    <!-- JavaScript code for AJAX requests -->
+    <script>
+        $(document).ready(function() {
+            // Call listProducts() when the page loads
+            listProducts();
+        });
+
+           // Function to fetch and display the list of products
+            function listProducts() {
+                $.ajax({
+                    url: '/api/products/',
+                    method: 'GET',
+                    success: function(products) {
+                        // Clear the product list
+                        $('#product-list').empty();
+
+                        // Iterate through the products and display them
+                        for (var i = 0; i < products.length; i++) {
+                            $('#product-list').append('<li>' + products[i].name + ' - $' + products[i].price + ' <button onclick="deleteProduct(' + products[i].id + ')">Delete</button></li>');
+                        }
+                    }
+                });
+            }
+
+        // Function to add a new product
+        function addProduct() {
+            var name = $('#name').val();
+            var price = $('#price').val();
+
+            // Create a JSON object for the new product
+            var newProduct = {
+                name: name,
+                price: price
+            };
+
+            $.ajax({
+                url: '/api/products/',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(newProduct),
+                success: function() {
+                    // Clear the input fields
+                    $('#name').val('');
+                    $('#price').val('');
+
+                    // Refresh the product list
+                    listProducts();
+                }
+            });
+        }
+
+        // Function to delete a product
+        function deleteProduct(productId) {
+            $.ajax({
+                url: '/api/products/' + productId,
+                method: 'DELETE',
+                success: function() {
+                    // Refresh the product list
+                    listProducts();
+                }
+            });
+        }
+
+        // Initial load: Fetch and display the list of products
+        listProducts();
+    </script>
+</body>
+</html>
